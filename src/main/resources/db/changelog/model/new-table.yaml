@@ -1,0 +1,100 @@
+databaseChangeLog:
+    - changeSet:
+        id: table-book
+        author: Vinicius Chioratto
+        preConditions:
+            - onFail: MARK_RAN
+              sqlCheck:
+                expectedResult: 0
+                sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'book'
+        changes:
+            - createTable:
+                tableName: book
+                columns:
+                    - column:
+                        name: id
+                        type: BIGINT
+                    - column:
+                        name: title
+                        type: VARCHAR(255)
+                    - column:
+                        name: base_price
+                        type: FLOAT
+                    - column:
+                        name: quantity
+                        type: BIGINT
+                    - column:
+                        name: type
+                        type: VARCHAR(255)
+                    - column:
+                        name: created_at
+                        type: TIMESTAMP
+                    - column:
+                        name: updated_at
+                        type: TIMESTAMP
+    - changeSet:
+        id: table-user
+        author: Vinicius Chioratto
+        preConditions:
+          - onFail: MARK_RAN
+            sqlCheck:
+              expectedResult: 0
+              sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'user'
+        changes:
+          - createTable:
+              tableName: user
+              columns:
+                - column:
+                    name: id
+                    type: BIGINT
+                - column:
+                    name: name
+                    type: VARCHAR(255)
+                - column:
+                    name: email
+                    type: VARCHAR(255)
+                    constraints:
+                        unique: true
+                - column:
+                    name: loyalty_points
+                    type: BIGINT
+                - column:
+                    name: created_at
+                    type: TIMESTAMP
+                - column:
+                    name: updated_at
+                    type: TIMESTAMP
+
+    - changeSet:
+        id: table-purchase
+        author: Vinicius Chioratto
+        preConditions:
+          - onFail: MARK_RAN
+            sqlCheck:
+              expectedResult: 0
+              sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'purchase'
+        changes:
+          - createTable:
+              tableName: purchase
+              columns:
+                - column:
+                    name: id
+                    type: BIGINT
+                - column:
+                    name: quantity
+                    type: BIGINT
+                - column:
+                    name: is_loyalty_points
+                    type: BOOLEAN
+                - column:
+                    name: user_id
+                    type: BIGINT
+                - column:
+                    name: book_id
+                    type: BIGINT
+                - column:
+                    name: created_at
+                    type: TIMESTAMP
+                - column:
+                    name: updated_at
+                    type: TIMESTAMP

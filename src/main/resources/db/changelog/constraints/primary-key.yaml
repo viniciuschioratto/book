@@ -1,0 +1,40 @@
+databaseChangeLog:
+    - changeSet:
+        id: primary-key-book
+        author: Vinicius Chioratto
+        preConditions:
+            - onFail: MARK_RAN
+              sqlCheck:
+                expectedResult: 0
+                sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'book' AND constraint_type = 'PRIMARY KEY'
+        changes:
+            - addPrimaryKey:
+                columnNames: id
+                constraintName: pk_book
+                tableName: book
+    - changeSet:
+        id: primary-key-user
+        author: Vinicius Chioratto
+        preConditions:
+            - onFail: MARK_RAN
+              sqlCheck:
+                expectedResult: 0
+                sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'user' AND constraint_type = 'PRIMARY KEY'
+        changes:
+            - addPrimaryKey:
+                columnNames: id
+                constraintName: pk_user
+                tableName: user
+    - changeSet:
+        id: primary-key-purchase
+        author: Vinicius Chioratto
+        preConditions:
+          - onFail: MARK_RAN
+            sqlCheck:
+              expectedResult: 0
+              sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'purchase' AND constraint_type = 'PRIMARY KEY'
+        changes:
+          - addPrimaryKey:
+              columnNames: id
+              constraintName: pk_purchase
+              tableName: purchase

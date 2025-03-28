@@ -1,0 +1,68 @@
+databaseChangeLog:
+  # Book
+  - changeSet:
+      id: sequence-book
+      author: Vinicius Chioratto
+      preConditions:
+        - onFail: CONTINUE
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM information_schema.sequences WHERE sequence_name = 'book_sequence'
+      changes:
+        - createSequence:
+            sequenceName: book_sequence
+            startValue: 1
+            incrementBy: 1
+
+  - changeSet:
+      id: set-book-sequence
+      author: Vinicius Chioratto
+      changes:
+        - modifySql:
+            dbms: postgresql
+            sql: ALTER TABLE book ALTER COLUMN id SET DEFAULT nextval('book_sequence')
+  # User
+  - changeSet:
+      id: sequence-user
+      author: Vinicius Chioratto
+      preConditions:
+        - onFail: CONTINUE
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM information_schema.sequences WHERE sequence_name = 'user_sequence'
+      changes:
+        - createSequence:
+            sequenceName: user_sequence
+            startValue: 1
+            incrementBy: 1
+
+  - changeSet:
+      id: set-user-sequence
+      author: Vinicius Chioratto
+      changes:
+        - modifySql:
+            dbms: postgresql
+            sql: ALTER TABLE user ALTER COLUMN id SET DEFAULT nextval('user_sequence')
+
+  # Purchase
+  - changeSet:
+      id: sequence-purchase
+      author: Vinicius Chioratto
+      preConditions:
+        - onFail: CONTINUE
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM information_schema.sequences WHERE sequence_name = 'purchase_sequence'
+      changes:
+        - createSequence:
+            sequenceName: purchase_sequence
+            startValue: 1
+            incrementBy: 1
+
+  - changeSet:
+      id: set-purchase-sequence
+      author: Vinicius Chioratto
+      changes:
+        - modifySql:
+            dbms: postgresql
+            sql: ALTER TABLE purchase ALTER COLUMN id SET DEFAULT nextval('purchase_sequence')
