@@ -1,6 +1,6 @@
 package com.bookstore.book.adapters.in.api;
 
-import com.bookstore.book.adapters.in.api.mapper.BookMapper;
+import com.bookstore.book.adapters.in.api.mapper.BookRequestMapper;
 import com.bookstore.book.adapters.in.api.request.CreateBookRequest;
 import com.bookstore.book.adapters.in.api.request.UpdateBookRequest;
 import com.bookstore.book.adapters.in.api.response.BookResponse;
@@ -26,14 +26,14 @@ import java.util.List;
 @Tag(name = "Book API V1", description = "This API exposes resources about Book Domain")
 public class BookApi {
     private final BookCrudInputPort bookCrudInputPort;
-    private final BookMapper bookMapper;
+    private final BookRequestMapper bookRequestMapper;
 
     public BookApi(
             BookCrudInputPort bookCrudInputPort,
-            BookMapper bookMapper
+            BookRequestMapper bookRequestMapper
     ) {
         this.bookCrudInputPort = bookCrudInputPort;
-        this.bookMapper = bookMapper;
+        this.bookRequestMapper = bookRequestMapper;
     }
 
     @Operation(summary = "Create Book")
@@ -59,8 +59,8 @@ public class BookApi {
     })
     @PostMapping
     public ResponseEntity<BookResponse> createBook(@RequestBody CreateBookRequest createBookRequest) {
-        BookDomain bookDomain = bookCrudInputPort.createBook(bookMapper.createBookRequestToBookDomain(createBookRequest));
-        return ResponseEntity.ok(bookMapper.bookDomainToBookResponse(bookDomain));
+        BookDomain bookDomain = bookCrudInputPort.createBook(bookRequestMapper.createBookRequestToBookDomain(createBookRequest));
+        return ResponseEntity.ok(bookRequestMapper.bookDomainToBookResponse(bookDomain));
     }
 
     @Operation(summary = "Update Book by Id")
@@ -86,8 +86,8 @@ public class BookApi {
     })
     @PutMapping("{bookId}")
     public ResponseEntity<BookResponse> updateBook(@PathVariable("bookId") Long bookId, @RequestBody UpdateBookRequest updateBookRequest) throws BookNotFoundException {
-        BookDomain bookDomain = bookCrudInputPort.updateBook(bookId, bookMapper.updateBookRequestToBookDomain(updateBookRequest));
-        return ResponseEntity.ok(bookMapper.bookDomainToBookResponse(bookDomain));
+        BookDomain bookDomain = bookCrudInputPort.updateBook(bookId, bookRequestMapper.updateBookRequestToBookDomain(updateBookRequest));
+        return ResponseEntity.ok(bookRequestMapper.bookDomainToBookResponse(bookDomain));
     }
 
     @Operation(summary = "Get Book by ID")
@@ -114,7 +114,7 @@ public class BookApi {
     @GetMapping("{bookId}")
     public ResponseEntity<BookResponse> getBookById(@PathVariable("bookId") Long bookId) throws BookNotFoundException {
         BookDomain bookDomain = bookCrudInputPort.getBookById(bookId);
-        return ResponseEntity.ok(bookMapper.bookDomainToBookResponse(bookDomain));
+        return ResponseEntity.ok(bookRequestMapper.bookDomainToBookResponse(bookDomain));
     }
 
     @Operation(summary = "Delete Book by ID")
@@ -160,9 +160,9 @@ public class BookApi {
                     )
             }),
     })
-    @GetMapping()
+    @GetMapping("/all")
     public ResponseEntity<List<BookResponse>> getBookList() {
         List<BookDomain> bookDomains = bookCrudInputPort.getAllBooks();
-        return ResponseEntity.ok(bookMapper.bookDomainsToBookResponses(bookDomains));
+        return ResponseEntity.ok(bookRequestMapper.bookDomainsToBookResponses(bookDomains));
     }
 }

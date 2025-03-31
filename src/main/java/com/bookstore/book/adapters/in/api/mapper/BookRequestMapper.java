@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface BookMapper {
+public interface BookRequestMapper {
     BookDomain createBookRequestToBookDomain(CreateBookRequest createBookRequest);
     CreateBookResponse bookDomainToCreateBookResponse(BookDomain bookDomain);
     BookResponse bookDomainToBookResponse(BookDomain bookDomain);
