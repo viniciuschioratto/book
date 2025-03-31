@@ -1,0 +1,42 @@
+package com.bookstore.book.application.core.usecase;
+
+import com.bookstore.book.application.core.domain.BookDomain;
+import com.bookstore.book.application.core.exceptions.BookNotFoundException;
+import com.bookstore.book.application.ports.in.BookCrudInputPort;
+import com.bookstore.book.application.ports.out.BookCrudOutputPort;
+
+import java.util.Optional;
+import java.util.logging.Logger;
+
+public class BookCrudImpl implements BookCrudInputPort {
+    private final Logger logger = Logger.getLogger(BookCrudImpl.class.getName());
+    private final BookCrudOutputPort bookCrudOutputPort;
+
+    public BookCrudImpl(BookCrudOutputPort bookCrudOutputPort) {
+        this.bookCrudOutputPort = bookCrudOutputPort;
+    }
+
+    @Override
+    public BookDomain createBook(BookDomain bookDomain) {
+        return bookCrudOutputPort.createBook(bookDomain);
+    }
+
+    @Override
+    public BookDomain getBookById(Long id) throws BookNotFoundException {
+        Optional<BookDomain> book = bookCrudOutputPort.getBookById(id);
+        return book.orElseThrow(() -> {
+            logger.warning("Book not found");
+            return new BookNotFoundException("Book not found with id: " + id);
+        });
+    }
+
+    @Override
+    public BookDomain updateBook(BookDomain bookDomain) {
+        return bookCrudOutputPort.updateBook(bookDomain);
+    }
+
+    @Override
+    public void deleteBook(Long id) {
+        bookCrudOutputPort.deleteBook(id);
+    }
+}
