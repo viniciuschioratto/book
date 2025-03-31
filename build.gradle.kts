@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.4.4"
 	id("io.spring.dependency-management") version "1.1.7"
+	jacoco
 }
 
 group = "com.bookstore"
@@ -44,4 +45,9 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	finalizedBy("jacocoTestReport")
+	doLast {
+		println("View code coverage at:")
+		println("file://$buildDir/reports/jacoco/test/html/index.html")
+	}
 }
