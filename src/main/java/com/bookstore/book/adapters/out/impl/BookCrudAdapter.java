@@ -39,7 +39,8 @@ public class BookCrudAdapter implements BookCrudOutputPort {
 
     @Override
     public BookDomain updateBook(BookDomain bookDomain) {
-        return null;
+        BookEntity entity = bookEntityMapper.fromBookDomainToBookEntity(bookDomain);
+        return bookEntityMapper.fromBookEntityToBookDomain(bookRepository.saveAndFlush(entity));
     }
 
     @Override

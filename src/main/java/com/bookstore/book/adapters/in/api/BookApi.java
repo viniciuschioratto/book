@@ -2,8 +2,8 @@ package com.bookstore.book.adapters.in.api;
 
 import com.bookstore.book.adapters.in.api.mapper.BookMapper;
 import com.bookstore.book.adapters.in.api.request.CreateBookRequest;
+import com.bookstore.book.adapters.in.api.request.UpdateBookRequest;
 import com.bookstore.book.adapters.in.api.response.BookResponse;
-import com.bookstore.book.adapters.in.api.response.CreateBookResponse;
 import com.bookstore.book.adapters.in.api.response.ExceptionResponse;
 import com.bookstore.book.application.core.domain.BookDomain;
 import com.bookstore.book.application.core.exceptions.BookNotFoundException;
@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public class BookApi {
             @ApiResponse(responseCode = "200", description = "Book created successfully", content = {
                     @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = CreateBookResponse.class)
+                            schema = @Schema(implementation = BookResponse.class)
                     )
             }),
             @ApiResponse(responseCode = "400", description = "Bad request - Error to create book", content = {
@@ -59,9 +58,36 @@ public class BookApi {
             }),
     })
     @PostMapping
-    public ResponseEntity<CreateBookResponse> createBook(@RequestBody CreateBookRequest createBookRequest) {
+    public ResponseEntity<BookResponse> createBook(@RequestBody CreateBookRequest createBookRequest) {
         BookDomain bookDomain = bookCrudInputPort.createBook(bookMapper.createBookRequestToBookDomain(createBookRequest));
-        return ResponseEntity.ok(bookMapper.bookDomainToCreateBookResponse(bookDomain));
+        return ResponseEntity.ok(bookMapper.bookDomainToBookResponse(bookDomain));
+    }
+
+    @Operation(summary = "Update Book by Id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book updated successfully", content = {
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = BookResponse.class)
+                    )
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad request - Error to update book", content = {
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)
+                    )
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal error - The server faced issues to resolve the request", content = {
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)
+                    )
+            }),
+    })
+    @PutMapping("{bookId}")
+    public ResponseEntity<BookResponse> updateBook(@PathVariable("bookId") Long bookId, @RequestBody UpdateBookRequest updateBookRequest) throws BookNotFoundException {
+        BookDomain bookDomain = bookCrudInputPort.updateBook(bookId, bookMapper.updateBookRequestToBookDomain(updateBookRequest));
+        return ResponseEntity.ok(bookMapper.bookDomainToBookResponse(bookDomain));
     }
 
     @Operation(summary = "Get Book by ID")

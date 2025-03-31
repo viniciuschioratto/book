@@ -32,7 +32,8 @@ public class BookCrudImpl implements BookCrudInputPort {
     }
 
     @Override
-    public BookDomain updateBook(BookDomain bookDomain) {
+    public BookDomain updateBook(Long bookId, BookDomain bookDomain) throws BookNotFoundException {
+        getBookById(bookId);
         return bookCrudOutputPort.updateBook(bookDomain);
     }
 

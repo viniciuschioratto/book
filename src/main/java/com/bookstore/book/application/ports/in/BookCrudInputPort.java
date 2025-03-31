@@ -8,7 +8,7 @@ import java.util.List;
 public interface BookCrudInputPort {
     BookDomain createBook(BookDomain bookDomain);
     BookDomain getBookById(Long id) throws BookNotFoundException;
-    BookDomain updateBook(BookDomain bookDomain);
+    BookDomain updateBook(Long bookId, BookDomain bookDomain) throws BookNotFoundException;
     void deleteBook(Long id) throws BookNotFoundException;
     List<BookDomain> getAllBooks();
 }

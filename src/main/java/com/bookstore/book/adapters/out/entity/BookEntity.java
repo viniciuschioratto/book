@@ -26,6 +26,7 @@ public class BookEntity {
 
     private int quantity;
 
+    @Enumerated(EnumType.STRING)
     private BookType type;
 
     private String author;
