@@ -23,13 +23,14 @@ public class UserCrudAdapter implements UserCrudOutputPort {
 
     @Override
     public UserDomain createUser(UserDomain userDomain) {
-        UserEntity userEntity = userEntityMapper.fromUserDomainToUserEntity(userDomain);
+        UserEntity userEntity = userEntityMapper.fromUserDomainToUserEntityCreate(userDomain);
         return userEntityMapper.fromUserEntityToUserDomain(userRepository.saveAndFlush(userEntity));
     }
 
     @Override
     public UserDomain updateUser(UserDomain userDomain) {
-        UserEntity userEntity = userEntityMapper.fromUserDomainToUserEntity(userDomain);
+        UserEntity currentUserEntity = userRepository.findById(userDomain.getId()).orElseThrow();
+        UserEntity userEntity = userEntityMapper.fromUserDomainToUserEntityCreateUpdate(userDomain, currentUserEntity);
         return userEntityMapper.fromUserEntityToUserDomain(userRepository.saveAndFlush(userEntity));
     }
 
