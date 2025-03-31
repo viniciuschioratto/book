@@ -20,8 +20,8 @@ databaseChangeLog:
       changes:
         - modifySql:
             dbms: postgresql
-            sql: ALTER TABLE book ALTER COLUMN id SET DEFAULT nextval('book_sequence')
-  # User
+            sql: ALTER TABLE book_bookstore ALTER COLUMN id SET DEFAULT nextval('book_sequence')
+  # user_bookstore
   - changeSet:
       id: sequence-user
       author: Vinicius Chioratto
@@ -42,7 +42,7 @@ databaseChangeLog:
       changes:
         - modifySql:
             dbms: postgresql
-            sql: ALTER TABLE user ALTER COLUMN id SET DEFAULT nextval('user_sequence')
+            sql: ALTER TABLE user_bookstore ALTER COLUMN id SET DEFAULT nextval('user_sequence')
 
   # Purchase
   - changeSet:
@@ -65,4 +65,4 @@ databaseChangeLog:
       changes:
         - modifySql:
             dbms: postgresql
-            sql: ALTER TABLE purchase ALTER COLUMN id SET DEFAULT nextval('purchase_sequence')
+            sql: ALTER TABLE purchase_bookstore ALTER COLUMN id SET DEFAULT nextval('purchase_sequence')

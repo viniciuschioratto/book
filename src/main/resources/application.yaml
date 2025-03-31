@@ -21,6 +21,7 @@ spring:
   docker:
     compose:
       enabled: true
+      file: docker-compose.yml
 springdoc:
   api-docs:
     path: /api-docs

@@ -6,10 +6,10 @@ databaseChangeLog:
             - onFail: MARK_RAN
               sqlCheck:
                 expectedResult: 0
-                sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'book'
+                sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'book_bookstore'
         changes:
             - createTable:
-                tableName: book
+                tableName: book_bookstore
                 columns:
                     - column:
                         name: id
@@ -45,10 +45,10 @@ databaseChangeLog:
           - onFail: MARK_RAN
             sqlCheck:
               expectedResult: 0
-              sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'user'
+              sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'user_bookstore'
         changes:
           - createTable:
-              tableName: user
+              tableName: user_bookstore
               columns:
                 - column:
                     name: id
@@ -64,6 +64,7 @@ databaseChangeLog:
                 - column:
                     name: loyalty_points
                     type: BIGINT
+                    defaultValue: 0
                 - column:
                     name: created_at
                     type: TIMESTAMP
@@ -78,10 +79,10 @@ databaseChangeLog:
           - onFail: MARK_RAN
             sqlCheck:
               expectedResult: 0
-              sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'purchase'
+              sql: SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'purchase_bookstore'
         changes:
           - createTable:
-              tableName: purchase
+              tableName: purchase_bookstore
               columns:
                 - column:
                     name: id

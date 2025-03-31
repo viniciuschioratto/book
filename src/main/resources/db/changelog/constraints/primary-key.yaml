@@ -6,12 +6,12 @@ databaseChangeLog:
             - onFail: MARK_RAN
               sqlCheck:
                 expectedResult: 0
-                sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'book' AND constraint_type = 'PRIMARY KEY'
+                sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'book_bookstore' AND constraint_type = 'PRIMARY KEY'
         changes:
             - addPrimaryKey:
                 columnNames: id
                 constraintName: pk_book
-                tableName: book
+                tableName: book_bookstore
     - changeSet:
         id: primary-key-user
         author: Vinicius Chioratto
@@ -19,12 +19,12 @@ databaseChangeLog:
             - onFail: MARK_RAN
               sqlCheck:
                 expectedResult: 0
-                sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'user' AND constraint_type = 'PRIMARY KEY'
+                sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'user_bookstore' AND constraint_type = 'PRIMARY KEY'
         changes:
             - addPrimaryKey:
                 columnNames: id
                 constraintName: pk_user
-                tableName: user
+                tableName: user_bookstore
     - changeSet:
         id: primary-key-purchase
         author: Vinicius Chioratto
@@ -32,9 +32,9 @@ databaseChangeLog:
           - onFail: MARK_RAN
             sqlCheck:
               expectedResult: 0
-              sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'purchase' AND constraint_type = 'PRIMARY KEY'
+              sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'purchase_bookstore' AND constraint_type = 'PRIMARY KEY'
         changes:
           - addPrimaryKey:
               columnNames: id
               constraintName: pk_purchase
-              tableName: purchase
+              tableName: purchase_bookstore
