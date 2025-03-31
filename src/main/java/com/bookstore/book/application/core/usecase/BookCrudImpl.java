@@ -5,6 +5,7 @@ import com.bookstore.book.application.core.exceptions.BookNotFoundException;
 import com.bookstore.book.application.ports.in.BookCrudInputPort;
 import com.bookstore.book.application.ports.out.BookCrudOutputPort;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -36,7 +37,13 @@ public class BookCrudImpl implements BookCrudInputPort {
     }
 
     @Override
-    public void deleteBook(Long id) {
+    public void deleteBook(Long id) throws BookNotFoundException {
+        getBookById(id);
         bookCrudOutputPort.deleteBook(id);
+    }
+
+    @Override
+    public List<BookDomain> getAllBooks() {
+        return bookCrudOutputPort.getAllBooks();
     }
 }

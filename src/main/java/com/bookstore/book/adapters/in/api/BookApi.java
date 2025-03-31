@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/book/v1")
@@ -57,8 +59,7 @@ public class BookApi {
             }),
     })
     @PostMapping
-    // TODO - Validated is not working
-    public ResponseEntity<CreateBookResponse> createBook(@RequestBody @Validated CreateBookRequest createBookRequest) {
+    public ResponseEntity<CreateBookResponse> createBook(@RequestBody CreateBookRequest createBookRequest) {
         BookDomain bookDomain = bookCrudInputPort.createBook(bookMapper.createBookRequestToBookDomain(createBookRequest));
         return ResponseEntity.ok(bookMapper.bookDomainToCreateBookResponse(bookDomain));
     }
@@ -88,5 +89,54 @@ public class BookApi {
     public ResponseEntity<BookResponse> getBookById(@PathVariable("bookId") Long bookId) throws BookNotFoundException {
         BookDomain bookDomain = bookCrudInputPort.getBookById(bookId);
         return ResponseEntity.ok(bookMapper.bookDomainToBookResponse(bookDomain));
+    }
+
+    @Operation(summary = "Delete Book by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request - Error to delete book", content = {
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)
+                    )
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal error - The server faced issues to resolve the request", content = {
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)
+                    )
+            }),
+    })
+    @DeleteMapping("{bookId}")
+    public ResponseEntity<Void> deleteBookById(@PathVariable("bookId") Long bookId) throws BookNotFoundException {
+        bookCrudInputPort.deleteBook(bookId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Get all Book")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book list returned successfully", content = {
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = BookResponse.class)
+                    )
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad request - Error to return book list", content = {
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)
+                    )
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal error - The server faced issues to resolve the request", content = {
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionResponse.class)
+                    )
+            }),
+    })
+    @GetMapping()
+    public ResponseEntity<List<BookResponse>> getBookList() {
+        List<BookDomain> bookDomains = bookCrudInputPort.getAllBooks();
+        return ResponseEntity.ok(bookMapper.bookDomainsToBookResponses(bookDomains));
     }
 }

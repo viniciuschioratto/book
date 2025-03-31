@@ -1,5 +1,6 @@
 package com.bookstore.book.adapters.out.impl;
 
+import com.bookstore.book.adapters.out.entity.BookEntity;
 import com.bookstore.book.adapters.out.mapper.BookEntityMapper;
 import com.bookstore.book.adapters.out.repository.BookRepository;
 import com.bookstore.book.application.core.domain.BookDomain;
@@ -7,6 +8,7 @@ import com.bookstore.book.application.ports.out.BookCrudOutputPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -25,7 +27,9 @@ public class BookCrudAdapter implements BookCrudOutputPort {
 
     @Override
     public BookDomain createBook(BookDomain bookDomain) {
-        return null;
+        BookEntity entity = bookEntityMapper.fromBookDomainToBookEntity(bookDomain);
+        BookEntity newEntity = bookRepository.saveAndFlush(entity);
+        return bookEntityMapper.fromBookEntityToBookDomain(newEntity);
     }
 
     @Override
@@ -41,5 +45,10 @@ public class BookCrudAdapter implements BookCrudOutputPort {
     @Override
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
+    }
+
+    @Override
+    public List<BookDomain> getAllBooks() {
+        return bookEntityMapper.fromBookEntitiesToBookDomains(bookRepository.findAll());
     }
 }
