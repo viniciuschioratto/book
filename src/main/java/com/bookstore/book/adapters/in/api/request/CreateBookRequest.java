@@ -14,4 +14,6 @@ public class CreateBookRequest {
     private Float base_price;
     private int quantity;
     private BookTypeCreateRequest type;
+    private String author;
+    private String description;
 }

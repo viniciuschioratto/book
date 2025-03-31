@@ -28,6 +28,10 @@ public class BookEntity {
 
     private BookType type;
 
+    private String author;
+
+    private String description;
+
     @Column(updatable = false)
     private LocalDateTime created_at;
 

@@ -8,6 +8,8 @@ public class BookDomain {
     private final Float base_price;
     private final int quantity;
     private final BookTypeDomain type;
+    private final String author;
+    private final String description;
     private final LocalDateTime created_at;
     private final LocalDateTime updated_at;
 
@@ -17,6 +19,8 @@ public class BookDomain {
         this.base_price = builder.base_price;
         this.quantity = builder.quantity;
         this.type = builder.type;
+        this.author = builder.author;
+        this.description = builder.description;
         this.created_at = builder.created_at;
         this.updated_at = builder.updated_at;
     }
@@ -45,6 +49,14 @@ public class BookDomain {
         return type;
     }
 
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     public LocalDateTime getCreated_at() {
         return created_at;
     }
@@ -59,6 +71,8 @@ public class BookDomain {
         private Float base_price;
         private int quantity;
         private BookTypeDomain type;
+        private String author;
+        private String description;
         private LocalDateTime created_at;
         private LocalDateTime updated_at;
 
@@ -84,6 +98,16 @@ public class BookDomain {
 
         public BookDomain.Builder type(BookTypeDomain type) {
             this.type = type;
+            return this;
+        }
+
+        public BookDomain.Builder author(String author) {
+            this.author = author;
+            return this;
+        }
+
+        public BookDomain.Builder description(String description) {
+            this.description = description;
             return this;
         }
 

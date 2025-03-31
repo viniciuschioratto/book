@@ -18,6 +18,8 @@ public class BookResponse {
     private Float base_price;
     private int quantity;
     private BookTypeCreateRequest type;
+    private String author;
+    private String description;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
 }
