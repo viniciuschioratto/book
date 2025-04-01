@@ -1,6 +1,7 @@
 package com.bookstore.book.application.core.usecase;
 
 import com.bookstore.book.application.core.domain.*;
+import com.bookstore.book.application.core.exceptions.BookNotFoundException;
 import com.bookstore.book.application.core.exceptions.PurchaseNotFoundException;
 import com.bookstore.book.application.core.exceptions.UserNotFoundException;
 import com.bookstore.book.application.ports.in.BookCrudInputPort;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 public class PurchaseImpl implements PurchaseInputPort {
@@ -42,7 +44,16 @@ public class PurchaseImpl implements PurchaseInputPort {
     @Override
     public CalculatePriceDomain purchaseCalculatePrice(List<Long> bookIds, String userEmail) throws UserNotFoundException {
         UserDomain userDomain = userCrudInputPort.getUserByEmail(userEmail);
-        List<BookDomain> bookDomains = bookCrudInputPort.getBooksByIds(bookIds);
+        //List<BookDomain> bookDomains = bookCrudInputPort.getBooksByIds(bookIds);
+        List<BookDomain> bookDomains = new ArrayList<>();
+
+        bookIds.forEach(bookId -> {
+            try {
+                bookDomains.add(bookCrudInputPort.getBookById(bookId));
+            } catch (BookNotFoundException e) {
+                logger.warning("Book not found with id: " + bookId);
+            }
+        });
 
         List<CalculateBookPriceDomain> calculateBookPriceDomains = new ArrayList<>();
 
@@ -208,11 +219,28 @@ public class PurchaseImpl implements PurchaseInputPort {
 
         List<PurchaseDomain> purchaseDomainSaved = purchaseOutputPort.saveListPurchaseDomain(purchaseDomains);
 
-        purchaseDomainSaved.forEach(purchaseDomain -> {
-            // Update book quantity
-            // Decrease user loyalty points
+        //Long currentLoyaltyPoints = userDomain.getLoyalty_points();
+        AtomicLong currentLoyaltyPoints = new AtomicLong(userDomain.getLoyalty_points());
 
+        // Update book quantity
+        purchaseDomainSaved.forEach(purchaseDomain -> {
+            bookCrudInputPort.updateBookQuantity(
+                    purchaseDomain.getBookEntity().getQuantity() - 1,
+                    purchaseDomain.getBookEntity().getId()
+            );
+
+            if (purchaseDomain.getIs_loyalty_points()) {
+                // Remove 10 loyalty points
+                // The book bought with loyalty points does not add points
+                logger.info("Remove 10 loyalty points: " + currentLoyaltyPoints.get());
+                currentLoyaltyPoints.addAndGet(-10L);
+            } else {
+                currentLoyaltyPoints.incrementAndGet();
+            }
         });
+
+        // Update user loyalty points
+        userCrudInputPort.updateUserLoyaltyPoints(currentLoyaltyPoints.get(), userDomain.getId());
 
         return purchaseDomainSaved;
     }

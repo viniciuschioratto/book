@@ -42,6 +42,11 @@ public class UserCrudImpl implements UserCrudInputPort {
         });
     }
 
+    @Override
+    public void updateUserLoyaltyPoints(Long loyaltyPoints, Long userId) {
+        userCrudOutputPort.updateUserLoyaltyPoints(loyaltyPoints, userId);
+    }
+
     private UserDomain getUserById(Long userId) throws UserNotFoundException {
         Optional<UserDomain> userDomain = userCrudOutputPort.getUserById(userId);
         return userDomain.orElseThrow(() -> {

@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity(name = "book_bookstore")
 @Data
@@ -30,6 +29,8 @@ public class BookEntity {
     @Enumerated(EnumType.STRING)
     private BookType type;
 
+    private boolean active;
+
     private String author;
 
     private String description;
@@ -38,9 +39,6 @@ public class BookEntity {
     private LocalDateTime created_at;
 
     private LocalDateTime updated_at;
-
-    //@OneToMany(mappedBy = "bookEntity")
-    //private List<PurchaseEntity> purchaseEntities;
 
     @PrePersist
     protected void onInsert() {

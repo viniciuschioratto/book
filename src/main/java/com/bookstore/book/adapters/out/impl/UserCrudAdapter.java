@@ -7,6 +7,7 @@ import com.bookstore.book.application.core.domain.UserDomain;
 import com.bookstore.book.application.ports.out.UserCrudOutputPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -47,5 +48,11 @@ public class UserCrudAdapter implements UserCrudOutputPort {
     @Override
     public Optional<UserDomain> getUserById(Long userId) {
         return userEntityMapper.fromUserEntityOptionalToUserDomainOptional(userRepository.findById(userId));
+    }
+
+    @Transactional
+    @Override
+    public void updateUserLoyaltyPoints(Long loyaltyPoints, Long userId) {
+        userRepository.updateUserLoyaltyPoints(loyaltyPoints, userId);
     }
 }

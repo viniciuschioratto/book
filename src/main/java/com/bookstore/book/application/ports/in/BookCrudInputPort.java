@@ -12,4 +12,5 @@ public interface BookCrudInputPort {
     void deleteBook(Long id) throws BookNotFoundException;
     List<BookDomain> getAllBooks();
     List<BookDomain> getBooksByIds(List<Long> bookIds);
+    void updateBookQuantity(int quantity, Long bookId);
 }

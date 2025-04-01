@@ -12,4 +12,5 @@ public interface BookCrudOutputPort {
     void deleteBook(Long id);
     List<BookDomain> getAllBooks();
     List<BookDomain> getBooksByIds(List<Long> bookIds);
+    void updateBookQuantity(int quantity, Long bookId);
 }

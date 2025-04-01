@@ -4,6 +4,7 @@ import com.bookstore.book.application.core.domain.BookDomain;
 import com.bookstore.book.application.core.exceptions.BookNotFoundException;
 import com.bookstore.book.application.ports.in.BookCrudInputPort;
 import com.bookstore.book.application.ports.out.BookCrudOutputPort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,5 +52,11 @@ public class BookCrudImpl implements BookCrudInputPort {
     @Override
     public List<BookDomain> getBooksByIds(List<Long> bookIds) {
         return bookCrudOutputPort.getBooksByIds(bookIds);
+    }
+
+    @Transactional
+    @Override
+    public void updateBookQuantity(int quantity, Long bookId) {
+        bookCrudOutputPort.updateBookQuantity(quantity, bookId);
     }
 }

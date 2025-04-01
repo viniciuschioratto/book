@@ -10,4 +10,5 @@ public interface UserCrudOutputPort {
     void deleteUser(Long userId);
     Optional<UserDomain> getUserByEmail(String userEmail);
     Optional<UserDomain> getUserById(Long userId);
+    void updateUserLoyaltyPoints(Long loyaltyPoints, Long userId);
 }

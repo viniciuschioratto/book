@@ -7,6 +7,7 @@ import com.bookstore.book.application.core.domain.BookDomain;
 import com.bookstore.book.application.ports.out.BookCrudOutputPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class BookCrudAdapter implements BookCrudOutputPort {
 
     @Override
     public BookDomain createBook(BookDomain bookDomain) {
-        BookEntity entity = bookEntityMapper.fromBookDomainToBookEntity(bookDomain);
+        BookEntity entity = bookEntityMapper.fromBookDomainToBookEntityCreate(bookDomain);
         BookEntity newEntity = bookRepository.saveAndFlush(entity);
         return bookEntityMapper.fromBookEntityToBookDomain(newEntity);
     }
@@ -43,14 +44,15 @@ public class BookCrudAdapter implements BookCrudOutputPort {
         return bookEntityMapper.fromBookEntityToBookDomain(bookRepository.saveAndFlush(entity));
     }
 
+    @Transactional
     @Override
     public void deleteBook(Long id) {
-        bookRepository.deleteById(id);
+        bookRepository.logicalDeleteById(id);
     }
 
     @Override
     public List<BookDomain> getAllBooks() {
-        return bookEntityMapper.fromBookEntitiesToBookDomains(bookRepository.findAll());
+        return bookEntityMapper.fromBookEntitiesToBookDomains(bookRepository.findAllByActiveTrue());
     }
 
     @Override
@@ -58,5 +60,10 @@ public class BookCrudAdapter implements BookCrudOutputPort {
         return bookEntityMapper.fromBookEntitiesToBookDomains(
                 bookRepository.findAllById(bookIds)
         );
+    }
+
+    @Override
+    public void updateBookQuantity(int quantity, Long bookId) {
+        bookRepository.updateBookQuantity(quantity, bookId);
     }
 }

@@ -7,6 +7,7 @@ public class BookDomain {
     private final String title;
     private final Float base_price;
     private final int quantity;
+    private final boolean active;
     private final BookTypeDomain type;
     private final String author;
     private final String description;
@@ -18,6 +19,7 @@ public class BookDomain {
         this.title = builder.title;
         this.base_price = builder.base_price;
         this.quantity = builder.quantity;
+        this.active = builder.active;
         this.type = builder.type;
         this.author = builder.author;
         this.description = builder.description;
@@ -45,6 +47,10 @@ public class BookDomain {
         return quantity;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
     public BookTypeDomain getType() {
         return type;
     }
@@ -70,6 +76,7 @@ public class BookDomain {
         private String title;
         private Float base_price;
         private int quantity;
+        private boolean active;
         private BookTypeDomain type;
         private String author;
         private String description;
@@ -93,6 +100,11 @@ public class BookDomain {
 
         public BookDomain.Builder quantity(int quantity) {
             this.quantity = quantity;
+            return this;
+        }
+
+        public BookDomain.Builder active(boolean active) {
+            this.active = active;
             return this;
         }
 

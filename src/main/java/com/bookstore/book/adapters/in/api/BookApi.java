@@ -117,7 +117,7 @@ public class BookApi {
         return ResponseEntity.ok(bookRequestMapper.bookDomainToBookResponse(bookDomain));
     }
 
-    @Operation(summary = "Delete Book by ID")
+    @Operation(summary = "Delete Book by ID", description = "It is a logical delete")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Book deleted successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request - Error to delete book", content = {
