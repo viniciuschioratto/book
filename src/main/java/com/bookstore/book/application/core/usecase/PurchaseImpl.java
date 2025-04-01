@@ -209,7 +209,7 @@ public class PurchaseImpl implements PurchaseInputPort {
                 .map(value -> new PurchaseDomain.Builder()
                         .quantity(1)
                         .transaction_id(transactionId)
-                        .is_loyalty_points(value.getLoyalty_points())
+                        .loyalty_points(value.getLoyalty_points())
                         .price(value.getTotalPrice())
                         .final_price(value.getTotalPrice() - value.getDiscount())
                         .bookEntity(value.getBook())
@@ -229,7 +229,8 @@ public class PurchaseImpl implements PurchaseInputPort {
                     purchaseDomain.getBookEntity().getId()
             );
 
-            if (purchaseDomain.getIs_loyalty_points()) {
+            logger.info("Book loyalty points: " + purchaseDomain.getloyalty_points());
+            if (purchaseDomain.getloyalty_points()) {
                 // Remove 10 loyalty points
                 // The book bought with loyalty points does not add points
                 logger.info("Remove 10 loyalty points: " + currentLoyaltyPoints.get());

@@ -6,7 +6,7 @@ import java.util.UUID;
 public class PurchaseDomain {
     private final Long id;
     private final int quantity;
-    private final boolean is_loyalty_points;
+    private final boolean loyalty_points;
     private final float price;
     private final float final_price;
     private final UUID transaction_id;
@@ -18,7 +18,7 @@ public class PurchaseDomain {
     public PurchaseDomain(PurchaseDomain.Builder builder) {
         this.id = builder.id;
         this.quantity = builder.quantity;
-        this.is_loyalty_points = builder.is_loyalty_points;
+        this.loyalty_points = builder.loyalty_points;
         this.price = builder.price;
         this.final_price = builder.final_price;
         this.transaction_id = builder.transaction_id;
@@ -40,8 +40,8 @@ public class PurchaseDomain {
         return quantity;
     }
 
-    public boolean getIs_loyalty_points() {
-        return is_loyalty_points;
+    public boolean getloyalty_points() {
+        return loyalty_points;
     }
 
     public float getPrice() {
@@ -75,7 +75,7 @@ public class PurchaseDomain {
     public static class Builder {
         private Long id;
         private int quantity;
-        private boolean is_loyalty_points;
+        private boolean loyalty_points;
         private float price;
         private float final_price;
         private UUID transaction_id;
@@ -94,8 +94,8 @@ public class PurchaseDomain {
             return this;
         }
 
-        public PurchaseDomain.Builder is_loyalty_points(boolean is_loyalty_points) {
-            this.is_loyalty_points = is_loyalty_points;
+        public PurchaseDomain.Builder loyalty_points(boolean loyalty_points) {
+            this.loyalty_points = loyalty_points;
             return this;
         }
 

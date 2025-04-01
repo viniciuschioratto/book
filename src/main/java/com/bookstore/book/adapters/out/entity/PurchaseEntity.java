@@ -22,7 +22,7 @@ public class PurchaseEntity {
 
     private int quantity;
 
-    private boolean is_loyalty_points;
+    private boolean loyalty_points;
 
     private float price;
 

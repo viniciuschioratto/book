@@ -95,7 +95,7 @@ databaseChangeLog:
                     name: quantity
                     type: BIGINT
                 - column:
-                    name: is_loyalty_points
+                    name: loyalty_points
                     type: BOOLEAN
                 - column:
                     name: price
