@@ -1,18 +1,36 @@
 databaseChangeLog:
     - changeSet:
-        id: foreign-key-user-address
+        id: foreign-key-purchase-user
         author: Vinicius Chioratto
         preConditions:
             - onFail: MARK_RAN
               sqlCheck:
                 expectedResult: 0
-                sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_type = 'FOREIGN KEY' AND table_name = 'user_address' AND constraint_name = 'fk_user_address_user'
+                sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_type = 'FOREIGN KEY' AND table_name = 'purchase_bookstore' AND constraint_name = 'fk_purchase_user'
         changes:
             - addForeignKeyConstraint:
-                baseColumnNames: userid
-                baseTableName: user_address
-                constraintName: fk_user_address_user
+                baseColumnNames: user_id
+                baseTableName: purchase_bookstore
+                constraintName: fk_purchase_user
                 onDelete: CASCADE
                 onUpdate: CASCADE
                 referencedColumnNames: id
-                referencedTableName: user_db
+                referencedTableName: user_bookstore
+
+    - changeSet:
+          id: foreign-key-purchase-book
+          author: Vinicius Chioratto
+          preConditions:
+              - onFail: MARK_RAN
+                sqlCheck:
+                    expectedResult: 0
+                    sql: SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_type = 'FOREIGN KEY' AND table_name = 'purchase_bookstore' AND constraint_name = 'fk_purchase_book'
+          changes:
+              - addForeignKeyConstraint:
+                    baseColumnNames: book_id
+                    baseTableName: purchase_bookstore
+                    constraintName: fk_purchase_book
+                    onDelete: CASCADE
+                    onUpdate: CASCADE
+                    referencedColumnNames: id
+                    referencedTableName: book_bookstore

@@ -3,22 +3,22 @@ package com.bookstore.book.application.core.domain;
 import java.util.List;
 
 public class CalculatePriceDomain {
-    private final List<BookDomain> books;
+    private final List<CalculateBookPriceDomain> bookPriceDomains;
     private final boolean hasDiscount;
     private final float discount;
     private final float totalPriceWithoutDiscount;
     private final float totalPriceWithDiscount;
 
     public CalculatePriceDomain(CalculatePriceDomain.DomainBuilder domainBuilder) {
-        this.books = domainBuilder.books;
+        this.bookPriceDomains = domainBuilder.bookPriceDomains;
         this.hasDiscount = domainBuilder.hasDiscount;
         this.discount = domainBuilder.discount;
         this.totalPriceWithoutDiscount = domainBuilder.totalPriceWithoutDiscount;
         this.totalPriceWithDiscount = domainBuilder.totalPriceWithDiscount;
     }
 
-    public List<BookDomain> getBooks() {
-        return books;
+    public List<CalculateBookPriceDomain> getBookPriceDomains() {
+        return bookPriceDomains;
     }
 
     public boolean isHasDiscount() {
@@ -38,14 +38,14 @@ public class CalculatePriceDomain {
     }
 
     public static class DomainBuilder {
-        private List<BookDomain> books;
+        private List<CalculateBookPriceDomain> bookPriceDomains;
         private boolean hasDiscount;
         private float discount;
         private float totalPriceWithoutDiscount;
         private float totalPriceWithDiscount;
 
-        public DomainBuilder books(List<BookDomain> books) {
-            this.books = books;
+        public DomainBuilder bookPriceDomains(List<CalculateBookPriceDomain> bookPriceDomains) {
+            this.bookPriceDomains = bookPriceDomains;
             return this;
         }
 

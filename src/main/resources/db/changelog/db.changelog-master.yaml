@@ -5,9 +5,9 @@ databaseChangeLog:
   - include:
       file: "constraints/primary-key.yaml"
       relativeToChangelogFile: true
-  #- include:
-  #    file: "constraints/foreign-key.yaml"
-  #    relativeToChangelogFile: true
+  - include:
+      file: "constraints/foreign-key.yaml"
+      relativeToChangelogFile: true
   - include:
       file: "sequence/create-sequence.yaml"
       relativeToChangelogFile: true

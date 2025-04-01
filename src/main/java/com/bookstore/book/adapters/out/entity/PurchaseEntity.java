@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity(name = "purchase_bookstore")
 @Data
@@ -18,6 +19,16 @@ public class PurchaseEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "purchase_sequence")
     @SequenceGenerator(name = "purchase_sequence", sequenceName = "purchase_sequence", allocationSize = 1)
     private Long id;
+
+    private int quantity;
+
+    private boolean is_loyalty_points;
+
+    private float price;
+
+    private float final_price;
+
+    private UUID transaction_id;
 
     @Column(updatable = false)
     private LocalDateTime created_at;

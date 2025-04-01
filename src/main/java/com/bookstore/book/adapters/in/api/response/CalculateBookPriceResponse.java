@@ -5,16 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CalculatePriceResponse {
-    private List<CalculateBookPriceResponse> bookPriceDomains;
-    private boolean hasDiscount;
+public class CalculateBookPriceResponse {
+    private BookResponse book;
+    private float totalPrice;
     private float discount;
-    private float totalPriceWithoutDiscount;
-    private float totalPriceWithDiscount;
+    private boolean loyalty_points;
 }

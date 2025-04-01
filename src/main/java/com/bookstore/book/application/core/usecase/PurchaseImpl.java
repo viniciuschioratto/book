@@ -8,8 +8,10 @@ import com.bookstore.book.application.ports.in.PurchaseInputPort;
 import com.bookstore.book.application.ports.in.UserCrudInputPort;
 import com.bookstore.book.application.ports.out.PurchaseOutputPort;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public class PurchaseImpl implements PurchaseInputPort {
@@ -41,6 +43,21 @@ public class PurchaseImpl implements PurchaseInputPort {
     public CalculatePriceDomain purchaseCalculatePrice(List<Long> bookIds, String userEmail) throws UserNotFoundException {
         UserDomain userDomain = userCrudInputPort.getUserByEmail(userEmail);
         List<BookDomain> bookDomains = bookCrudInputPort.getBooksByIds(bookIds);
+
+        List<CalculateBookPriceDomain> calculateBookPriceDomains = new ArrayList<>();
+
+        bookDomains.stream()
+                .filter(bookDomain -> bookDomain.getType().equals(BookTypeDomain.NEW_RELEASE))
+                .forEach(bookDomain -> {
+                    calculateBookPriceDomains.add(
+                            new CalculateBookPriceDomain.DomainBuilder()
+                                    .book(bookDomain)
+                                    .loyalty_points(false)
+                                    .totalPrice(bookDomain.getBase_price())
+                                    .discount(0.0f)
+                                    .build()
+                    );
+                });
 
         // Calculate total price
         Float totalPriceWithoutDiscount = bookDomains.stream()
@@ -79,6 +96,15 @@ public class PurchaseImpl implements PurchaseInputPort {
 
                 // Include the value of the free book in the discount
                 discount = bookDiscountFree.getBase_price();
+
+                calculateBookPriceDomains.add(
+                        new CalculateBookPriceDomain.DomainBuilder()
+                                .book(bookDiscountFree)
+                                .loyalty_points(true)
+                                .totalPrice(bookDiscountFree.getBase_price())
+                                .discount(bookDiscountFree.getBase_price())
+                                .build()
+                );
             }
         }
 
@@ -90,6 +116,28 @@ public class PurchaseImpl implements PurchaseInputPort {
         if (regularType.size() >= 3) {
             // 10% discount
             discount += regularTypePrice * 0.1f;
+
+            regularType.forEach(bookDomain -> {
+                calculateBookPriceDomains.add(
+                        new CalculateBookPriceDomain.DomainBuilder()
+                                .book(bookDomain)
+                                .loyalty_points(false)
+                                .totalPrice(bookDomain.getBase_price())
+                                .discount(bookDomain.getBase_price() * 0.1f)
+                                .build()
+                );
+            });
+        } else {
+            regularType.forEach(bookDomain -> {
+                calculateBookPriceDomains.add(
+                        new CalculateBookPriceDomain.DomainBuilder()
+                                .book(bookDomain)
+                                .loyalty_points(false)
+                                .totalPrice(bookDomain.getBase_price())
+                                .discount(0.0f)
+                                .build()
+                );
+            });
         }
 
         // Apply discount for OLD_EDITION type
@@ -97,14 +145,38 @@ public class PurchaseImpl implements PurchaseInputPort {
             if (oldEditionType.size() >= 3) {
                 // 25% discount
                 discount += oldEditionTypePrice * 0.25f;
+
+                oldEditionType.forEach(bookDomain -> {
+                    calculateBookPriceDomains.add(
+                            new CalculateBookPriceDomain.DomainBuilder()
+                                    .book(bookDomain)
+                                    .loyalty_points(false)
+                                    .totalPrice(bookDomain.getBase_price())
+                                    .discount(bookDomain.getBase_price() * 0.25f)
+                                    .build()
+                    );
+                });
+
             } else {
                 // 20% discount
                 discount += oldEditionTypePrice * 0.2f;
+
+                oldEditionType.forEach(bookDomain -> {
+                    calculateBookPriceDomains.add(
+                            new CalculateBookPriceDomain.DomainBuilder()
+                                    .book(bookDomain)
+                                    .loyalty_points(false)
+                                    .totalPrice(bookDomain.getBase_price())
+                                    .discount(bookDomain.getBase_price() * 0.2f)
+                                    .build()
+                    );
+                });
+
             }
         }
 
         return new CalculatePriceDomain.DomainBuilder()
-                .books(bookDomains)
+                .bookPriceDomains(calculateBookPriceDomains)
                 .totalPriceWithoutDiscount(totalPriceWithoutDiscount)
                 .hasDiscount(discount > 0)
                 .discount(discount)
@@ -117,17 +189,31 @@ public class PurchaseImpl implements PurchaseInputPort {
     @Override
     public List<PurchaseDomain> purchaseBooks(List<Long> bookIds, String userEmail) throws UserNotFoundException {
         UserDomain userDomain = userCrudInputPort.getUserByEmail(userEmail);
-        List<BookDomain> bookDomains = bookCrudInputPort.getBooksByIds(bookIds);
-        // Need to update the user loyalty points
-        // Decrease book quantity
+        CalculatePriceDomain calculatePriceDomain = purchaseCalculatePrice(bookIds, userEmail);
 
-        List<PurchaseDomain> purchaseDomains = bookDomains
+        UUID transactionId = UUID.randomUUID();
+
+        List<PurchaseDomain> purchaseDomains = calculatePriceDomain.getBookPriceDomains()
                 .stream()
                 .map(value -> new PurchaseDomain.Builder()
-                        .bookEntity(value)
+                        .quantity(1)
+                        .transaction_id(transactionId)
+                        .is_loyalty_points(value.getLoyalty_points())
+                        .price(value.getTotalPrice())
+                        .final_price(value.getTotalPrice() - value.getDiscount())
+                        .bookEntity(value.getBook())
                         .userEntity(userDomain)
                         .build())
                 .toList();
-        return purchaseOutputPort.saveListPurchaseDomain(purchaseDomains);
+
+        List<PurchaseDomain> purchaseDomainSaved = purchaseOutputPort.saveListPurchaseDomain(purchaseDomains);
+
+        purchaseDomainSaved.forEach(purchaseDomain -> {
+            // Update book quantity
+            // Decrease user loyalty points
+
+        });
+
+        return purchaseDomainSaved;
     }
 }

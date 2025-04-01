@@ -94,6 +94,15 @@ databaseChangeLog:
                     name: is_loyalty_points
                     type: BOOLEAN
                 - column:
+                    name: price
+                    type: FLOAT
+                - column:
+                    name: final_price
+                    type: FLOAT
+                - column:
+                    name: transaction_id
+                    type: UUID
+                - column:
                     name: user_id
                     type: BIGINT
                 - column:

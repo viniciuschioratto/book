@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -14,6 +15,16 @@ import java.time.LocalDateTime;
 @Builder
 public class PurchaseResponse {
     private Long id;
+
+    private int quantity;
+
+    private boolean is_loyalty_points;
+
+    private float price;
+
+    private float final_price;
+
+    private UUID transaction_id;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime created_at;
