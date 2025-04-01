@@ -52,4 +52,11 @@ public class BookCrudAdapter implements BookCrudOutputPort {
     public List<BookDomain> getAllBooks() {
         return bookEntityMapper.fromBookEntitiesToBookDomains(bookRepository.findAll());
     }
+
+    @Override
+    public List<BookDomain> getBooksByIds(List<Long> bookIds) {
+        return bookEntityMapper.fromBookEntitiesToBookDomains(
+                bookRepository.findAllById(bookIds)
+        );
+    }
 }

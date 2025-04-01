@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity(name = "user_bookstore")
 @Data
@@ -29,6 +30,9 @@ public class UserEntity {
     private LocalDateTime created_at;
 
     private LocalDateTime updated_at;
+
+    //@OneToMany(mappedBy = "userEntity")
+    //private List<PurchaseEntity> purchaseEntities;
 
     @PrePersist
     protected void onInsert() {

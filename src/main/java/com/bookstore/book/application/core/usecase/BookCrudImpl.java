@@ -47,4 +47,9 @@ public class BookCrudImpl implements BookCrudInputPort {
     public List<BookDomain> getAllBooks() {
         return bookCrudOutputPort.getAllBooks();
     }
+
+    @Override
+    public List<BookDomain> getBooksByIds(List<Long> bookIds) {
+        return bookCrudOutputPort.getBooksByIds(bookIds);
+    }
 }
