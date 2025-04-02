@@ -20,7 +20,7 @@ spring:
     enabled: true
   docker:
     compose:
-      enabled: true
+      enabled: false
       file: docker-compose.yml
 springdoc:
   api-docs:
