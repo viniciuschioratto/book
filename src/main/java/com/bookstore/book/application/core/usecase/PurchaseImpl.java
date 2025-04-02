@@ -4,15 +4,15 @@ import com.bookstore.book.application.core.domain.*;
 import com.bookstore.book.application.core.exceptions.BookNotFoundException;
 import com.bookstore.book.application.core.exceptions.PurchaseNotFoundException;
 import com.bookstore.book.application.core.exceptions.UserNotFoundException;
+import com.bookstore.book.application.core.interfaces.BookPriceStrategy;
+import com.bookstore.book.application.core.usecase.strategy.BookPriceStrategyFactory;
 import com.bookstore.book.application.ports.in.BookCrudInputPort;
 import com.bookstore.book.application.ports.in.PurchaseInputPort;
 import com.bookstore.book.application.ports.in.UserCrudInputPort;
 import com.bookstore.book.application.ports.out.PurchaseOutputPort;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
@@ -43,127 +43,98 @@ public class PurchaseImpl implements PurchaseInputPort {
 
     @Override
     public CalculatePriceDomain purchaseCalculatePrice(List<Long> bookIds, String userEmail) throws UserNotFoundException {
-        // Get user by email
+        // Get user
         UserDomain userDomain = userCrudInputPort.getUserByEmail(userEmail);
-        // Get books by ids
+        // Get books
         List<BookDomain> bookDomains = getBooks(bookIds);
 
         List<CalculateBookPriceDomain> calculateBookPriceDomains = new ArrayList<>();
 
-        // Filter books by type - NEW_RELEASE
-        // Add to calculateBookPriceDomains
-        filterNewReleaseTypeAndAddCalculateBookPriceDomains(bookDomains, calculateBookPriceDomains);
+        // Get a new List after apply user free book discount
+        List<BookDomain> userFreeBook = userFreeBook(userDomain, bookDomains, calculateBookPriceDomains);
 
-        // Calculate total price
-        Float totalPriceWithoutDiscount = sumBasePrice(bookDomains);
+        // A map to count the number of books by type
+        Map<BookTypeDomain, Long> countByBookTypeDomain = new HashMap<>();
+        countByBookTypeDomain.put(BookTypeDomain.NEW_RELEASE, countByBookTypeDomain(bookDomains, BookTypeDomain.NEW_RELEASE));
+        countByBookTypeDomain.put(BookTypeDomain.REGULAR, countByBookTypeDomain(bookDomains, BookTypeDomain.REGULAR));
+        countByBookTypeDomain.put(BookTypeDomain.OLD_EDITION, countByBookTypeDomain(bookDomains, BookTypeDomain.OLD_EDITION));
 
+        // Build the CalculateBookPriceDomain from the strategy
+        for (BookDomain bookDomain : userFreeBook) {
+            // Get the strategy by book type
+            BookPriceStrategy strategy = BookPriceStrategyFactory.getStrategy(bookDomain.getType());
 
-        // Filter books by type - REGULAR
-        List<BookDomain> regularType = filterByBookTypeDomain(bookDomains, BookTypeDomain.REGULAR);
+            // Calculate the price
+            CalculateBookPriceDomain calculateBookPriceDomain = strategy.calculatePrice(bookDomain, countByBookTypeDomain.get(bookDomain.getType()));
 
-        // Filter books by type - OLD_EDITION
-        List<BookDomain> oldEditionType = filterByBookTypeDomain(bookDomains, BookTypeDomain.OLD_EDITION);
-
-        float discount = 0.0f;
-
-        if (userDomain.getLoyalty_points() >= 10) {
-            // Get the cheapest book from REGULAR and OLD_EDITION
-            // This is the free book
-            BookDomain bookDiscountFree = bookDomains
-                    .stream()
-                    .filter(bookDomain -> bookDomain.getType().equals(BookTypeDomain.REGULAR) || bookDomain.getType().equals(BookTypeDomain.OLD_EDITION))
-                    .min((book1, book2) -> Float.compare(book1.getBase_price(), book2.getBase_price()))
-                    .orElse(null);
-
-            if (bookDiscountFree != null) {
-                // Remove free book from list
-                if (bookDiscountFree.getType().equals(BookTypeDomain.REGULAR)) {
-                    regularType = regularType.stream().filter(bookDomain -> !bookDomain.getId().equals(bookDiscountFree.getId())).toList();
-                } else {
-                    oldEditionType = oldEditionType.stream().filter(bookDomain -> !bookDomain.getId().equals(bookDiscountFree.getId())).toList();
-                }
-
-                // Include the value of the free book in the discount
-                discount = bookDiscountFree.getBase_price();
-
-                calculateBookPriceDomains.add(
-                        buildCalculateBookPriceDomain(bookDiscountFree, true, bookDiscountFree.getBase_price(), bookDiscountFree.getBase_price())
-                );
-            }
+            // Add to the list
+            calculateBookPriceDomains.add(calculateBookPriceDomain);
         }
 
-        // Calculate the total price of the books by type
-        Float regularTypePrice = sumBasePrice(regularType);
-        Float oldEditionTypePrice = sumBasePrice(oldEditionType);
+        // Get Total price without discount
+        Float totalPriceWithoutDiscount = sumTotalPriceWithoutDiscount(calculateBookPriceDomains);
 
-        boolean hasRegularTypeDiscount = regularType.size() >= 3;
-
-        // Apply discount for REGULAR type
-        if (hasRegularTypeDiscount) {
-            // 10% discount
-            discount += regularTypePrice * 0.1f;
-        }
-
-        regularType.forEach(bookDomain -> calculateBookPriceDomains.add(
-                buildCalculateBookPriceDomain(
-                        bookDomain,
-                        false,
-                        bookDomain.getBase_price(),
-                        hasRegularTypeDiscount ? bookDomain.getBase_price() * 0.1f : 0.0f
-                )
-        ));
-
-        // Apply discount for OLD_EDITION type
-        if (!oldEditionType.isEmpty()) {
-            if (oldEditionType.size() >= 3) {
-                // 25% discount
-                discount += oldEditionTypePrice * 0.25f;
-
-                oldEditionType.forEach(bookDomain -> calculateBookPriceDomains.add(
-                        buildCalculateBookPriceDomain(bookDomain, false, bookDomain.getBase_price(), bookDomain.getBase_price() * 0.25f)
-                ));
-
-            } else {
-                // 20% discount
-                discount += oldEditionTypePrice * 0.2f;
-
-                oldEditionType.forEach(bookDomain -> calculateBookPriceDomains.add(
-                        buildCalculateBookPriceDomain(bookDomain, false, bookDomain.getBase_price(), bookDomain.getBase_price() * 0.2f)
-                ));
-
-            }
-        }
+        // Get the discount
+        Float discount = sumDiscount(calculateBookPriceDomains);
 
         return new CalculatePriceDomain.DomainBuilder()
                 .bookPriceDomains(calculateBookPriceDomains)
                 .totalPriceWithoutDiscount(totalPriceWithoutDiscount)
                 .hasDiscount(discount > 0)
                 .discount(discount)
-                .totalPriceWithDiscount(
-                        totalPriceWithoutDiscount - discount
-                )
+                .totalPriceWithDiscount(totalPriceWithoutDiscount - discount)
                 .build();
     }
 
-    private Float sumBasePrice(List<BookDomain> bookDomains) {
-        return bookDomains.stream().reduce(0.0f, (subtotal, element) -> subtotal + element.getBase_price(), Float::sum);
+    private List<BookDomain> userFreeBook(UserDomain userDomain, List<BookDomain> bookDomains, List<CalculateBookPriceDomain> calculateBookPriceDomains) {
+        // If user has less than 10 loyalty points, return the current list of books
+        if (userDomain.getLoyalty_points() < 10) {
+            return bookDomains;
+        }
+
+        // Get the cheapest book from REGULAR and OLD_EDITION
+        // This is the free book
+        BookDomain bookDiscountFree = getFreeBook(bookDomains);
+
+        // Add free book to list
+        calculateBookPriceDomains.add(
+                buildCalculateBookPriceDomain(bookDiscountFree, true, bookDiscountFree.getBase_price(), bookDiscountFree.getBase_price())
+        );
+
+        // Remove free book from original list
+        // Only the first book found will be removed
+        AtomicBoolean removed = new AtomicBoolean(false);
+        return bookDomains.stream()
+                .filter(bookDomain -> {
+                    if (!removed.get() && bookDomain.getId().equals(bookDiscountFree.getId())) {
+                        removed.set(true);
+                        return false;
+                    }
+                    return true;
+                }).toList();
     }
 
-    private List<BookDomain> filterByBookTypeDomain(List<BookDomain> bookDomains, BookTypeDomain bookTypeDomain) {
+    private BookDomain getFreeBook(List<BookDomain> bookDomains) {
+        return bookDomains
+                .stream()
+                .filter(bookDomain -> bookDomain.getType().equals(BookTypeDomain.REGULAR) || bookDomain.getType().equals(BookTypeDomain.OLD_EDITION))
+                .min((book1, book2) -> Float.compare(book1.getBase_price(), book2.getBase_price()))
+                .orElse(null);
+    }
+
+    private Float sumTotalPriceWithoutDiscount(List<CalculateBookPriceDomain> calculateBookPriceDomains) {
+        return calculateBookPriceDomains.stream().reduce(0.0f, (subtotal, element) -> subtotal + element.getTotalPrice(), Float::sum);
+    }
+
+    private Float sumDiscount(List<CalculateBookPriceDomain> calculateBookPriceDomains) {
+        return calculateBookPriceDomains.stream().reduce(0.0f, (subtotal, element) -> subtotal + element.getDiscount(), Float::sum);
+    }
+
+    private long countByBookTypeDomain(List<BookDomain> bookDomains, BookTypeDomain bookTypeDomain) {
         return bookDomains
                 .stream()
                 .filter(bookDomain -> bookDomain.getType().equals(bookTypeDomain))
-                .toList();
-    }
-
-    private void filterNewReleaseTypeAndAddCalculateBookPriceDomains(List<BookDomain> bookDomains, List<CalculateBookPriceDomain> calculateBookPriceDomains) {
-        bookDomains.stream()
-                .filter(bookDomain -> bookDomain.getType().equals(BookTypeDomain.NEW_RELEASE))
-                .forEach(bookDomain -> {
-                    calculateBookPriceDomains.add(
-                            buildCalculateBookPriceDomain(bookDomain, false, bookDomain.getBase_price(), 0.0f)
-                    );
-                });
+                .count();
     }
 
     private List<BookDomain> getBooks(List<Long> bookIds) {
@@ -194,21 +165,8 @@ public class PurchaseImpl implements PurchaseInputPort {
         UserDomain userDomain = userCrudInputPort.getUserByEmail(userEmail);
         CalculatePriceDomain calculatePriceDomain = purchaseCalculatePrice(bookIds, userEmail);
 
-        UUID transactionId = UUID.randomUUID();
-
         // Create purchase
-        List<PurchaseDomain> purchaseDomains = calculatePriceDomain.getBookPriceDomains()
-                .stream()
-                .map(value -> new PurchaseDomain.Builder()
-                        .quantity(1)
-                        .transaction_id(transactionId)
-                        .loyalty_points(value.getLoyalty_points())
-                        .price(value.getTotalPrice())
-                        .final_price(value.getTotalPrice() - value.getDiscount())
-                        .bookEntity(value.getBook())
-                        .userEntity(userDomain)
-                        .build())
-                .toList();
+        List<PurchaseDomain> purchaseDomains = createPurchaseDomain(calculatePriceDomain, userDomain);
 
         // Save purchase
         List<PurchaseDomain> purchaseDomainSaved = purchaseOutputPort.saveListPurchaseDomain(purchaseDomains);
@@ -223,6 +181,25 @@ public class PurchaseImpl implements PurchaseInputPort {
         userCrudInputPort.updateUserLoyaltyPoints(currentLoyaltyPoints.get(), userDomain.getId());
 
         return purchaseDomainSaved;
+    }
+
+    private List<PurchaseDomain> createPurchaseDomain(CalculatePriceDomain calculatePriceDomain, UserDomain userDomain) {
+        // Generate a transaction id
+        // It is an id to group all purchases
+        UUID transactionId = UUID.randomUUID();
+
+        return calculatePriceDomain.getBookPriceDomains()
+                .stream()
+                .map(value -> new PurchaseDomain.Builder()
+                        .quantity(1)
+                        .transaction_id(transactionId)
+                        .loyalty_points(value.getLoyalty_points())
+                        .price(value.getTotalPrice())
+                        .final_price(value.getTotalPrice() - value.getDiscount())
+                        .bookEntity(value.getBook())
+                        .userEntity(userDomain)
+                        .build())
+                .toList();
     }
 
     private void updateBookQuantity(List<PurchaseDomain> purchaseDomainSaved, AtomicLong currentLoyaltyPoints) {
