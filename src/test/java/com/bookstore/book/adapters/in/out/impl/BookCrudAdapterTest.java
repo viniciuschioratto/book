@@ -49,14 +49,14 @@ public class BookCrudAdapterTest {
                 .base_price(10.0f)
                 .build();
 
-        Mockito.when(bookEntityMapper.fromBookDomainToBookEntity(bookDomain)).thenReturn(bookEntity);
+        Mockito.when(bookEntityMapper.fromBookDomainToBookEntityCreate(bookDomain)).thenReturn(bookEntity);
         Mockito.when(bookRepository.saveAndFlush(bookEntity)).thenReturn(bookEntity);
         Mockito.when(bookEntityMapper.fromBookEntityToBookDomain(bookEntity)).thenReturn(newBookDomain);
 
         BookDomain response = service.createBook(bookDomain);
 
         Assertions.assertNotNull(response);
-        Mockito.verify(bookEntityMapper, Mockito.times(1)).fromBookDomainToBookEntity(bookDomain);
+        Mockito.verify(bookEntityMapper, Mockito.times(1)).fromBookDomainToBookEntityCreate(bookDomain);
         Mockito.verify(bookRepository, Mockito.times(1)).saveAndFlush(bookEntity);
         Mockito.verify(bookEntityMapper, Mockito.times(1)).fromBookEntityToBookDomain(bookEntity);
         Mockito.verifyNoMoreInteractions(bookEntityMapper);
@@ -128,11 +128,11 @@ public class BookCrudAdapterTest {
 
         Long bookId = 1L;
 
-        Mockito.doNothing().when(bookRepository).deleteById(bookId);
+        Mockito.doNothing().when(bookRepository).logicalDeleteById(bookId);
 
         service.deleteBook(bookId);
 
-        Mockito.verify(bookRepository, Mockito.times(1)).deleteById(bookId);
+        Mockito.verify(bookRepository, Mockito.times(1)).logicalDeleteById(bookId);
         Mockito.verifyNoMoreInteractions(bookRepository);
     }
 
@@ -152,13 +152,13 @@ public class BookCrudAdapterTest {
                 .base_price(10.0f)
                 .build();
 
-        Mockito.when(bookRepository.findAll()).thenReturn(List.of(bookEntity));
+        Mockito.when(bookRepository.findAllByActiveTrue()).thenReturn(List.of(bookEntity));
         Mockito.when(bookEntityMapper.fromBookEntitiesToBookDomains(List.of(bookEntity))).thenReturn(List.of(bookDomain));
 
         List<BookDomain> response = service.getAllBooks();
 
         Assertions.assertNotNull(response);
-        Mockito.verify(bookRepository, Mockito.times(1)).findAll();
+        Mockito.verify(bookRepository, Mockito.times(1)).findAllByActiveTrue();
         Mockito.verify(bookEntityMapper, Mockito.times(1)).fromBookEntitiesToBookDomains(List.of(bookEntity));
         Mockito.verifyNoMoreInteractions(bookEntityMapper);
         Mockito.verifyNoMoreInteractions(bookRepository);

@@ -229,11 +229,9 @@ public class PurchaseImpl implements PurchaseInputPort {
                     purchaseDomain.getBookEntity().getId()
             );
 
-            logger.info("Book loyalty points: " + purchaseDomain.getloyalty_points());
             if (purchaseDomain.getloyalty_points()) {
                 // Remove 10 loyalty points
                 // The book bought with loyalty points does not add points
-                logger.info("Remove 10 loyalty points: " + currentLoyaltyPoints.get());
                 currentLoyaltyPoints.addAndGet(-10L);
             } else {
                 currentLoyaltyPoints.incrementAndGet();

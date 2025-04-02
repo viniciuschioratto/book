@@ -114,26 +114,4 @@ public class UserApi {
         UserDomain userDomain = userCrudInputPort.getUserByEmail(email);
         return ResponseEntity.ok(userRequestMapper.fromUserDomainToUserResponse(userDomain));
     }
-
-    @Operation(summary = "Delete User by Id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Book deleted successfully"),
-            @ApiResponse(responseCode = "400", description = "Bad request - Error to delete book", content = {
-                    @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ExceptionResponse.class)
-                    )
-            }),
-            @ApiResponse(responseCode = "500", description = "Internal error - The server faced issues to resolve the request", content = {
-                    @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ExceptionResponse.class)
-                    )
-            }),
-    })
-    @DeleteMapping("{userId}")
-    public ResponseEntity<Void> deleteBookById(@PathVariable("userId") Long userId) throws UserNotFoundException {
-        userCrudInputPort.deleteUser(userId);
-        return ResponseEntity.ok().build();
-    }
 }

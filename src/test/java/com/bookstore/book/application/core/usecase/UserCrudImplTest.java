@@ -66,25 +66,6 @@ public class UserCrudImplTest {
         Mockito.verifyNoMoreInteractions(userCrudOutputPort);
     }
 
-    @DisplayName("Should delete a user")
-    @Test
-    void should_deleteAUser() throws UserNotFoundException {
-        Long userId = 1L;
-        UserDomain userDomain = UserDomain.builder()
-                .id(userId)
-                .email("user@example.com")
-                .build();
-
-        Mockito.when(userCrudOutputPort.getUserById(userId)).thenReturn(Optional.of(userDomain));
-        Mockito.doNothing().when(userCrudOutputPort).deleteUser(userId);
-
-        service.deleteUser(userId);
-
-        Mockito.verify(userCrudOutputPort, Mockito.times(1)).getUserById(userId);
-        Mockito.verify(userCrudOutputPort, Mockito.times(1)).deleteUser(userId);
-        Mockito.verifyNoMoreInteractions(userCrudOutputPort);
-    }
-
     @DisplayName("Should get a user by email")
     @Test
     void should_getAUserByEmail() throws UserNotFoundException {

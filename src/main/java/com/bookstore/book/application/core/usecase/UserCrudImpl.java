@@ -28,12 +28,6 @@ public class UserCrudImpl implements UserCrudInputPort {
     }
 
     @Override
-    public void deleteUser(Long userId) throws UserNotFoundException {
-        getUserById(userId);
-        userCrudOutputPort.deleteUser(userId);
-    }
-
-    @Override
     public UserDomain getUserByEmail(String userEmail) throws UserNotFoundException {
         Optional<UserDomain> userDomain = userCrudOutputPort.getUserByEmail(userEmail);
         return userDomain.orElseThrow(() -> {

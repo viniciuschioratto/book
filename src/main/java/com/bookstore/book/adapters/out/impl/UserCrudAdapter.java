@@ -36,11 +36,6 @@ public class UserCrudAdapter implements UserCrudOutputPort {
     }
 
     @Override
-    public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
-    }
-
-    @Override
     public Optional<UserDomain> getUserByEmail(String userEmail) {
         return userEntityMapper.fromUserEntityOptionalToUserDomainOptional(userRepository.findByEmail(userEmail));
     }

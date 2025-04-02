@@ -160,24 +160,4 @@ public class UserApiTest {
         Mockito.verifyNoMoreInteractions(userRequestMapper);
 
     }
-
-    @DisplayName("Should Delete User by Id")
-    @Test
-    void should_deleteUserById() throws Exception {
-
-        Long userId = 123L;
-
-        Mockito.doNothing().when(userCrudInputPort).deleteUser(userId);
-
-        this.mockMvc
-                .perform(
-                        MockMvcRequestBuilders.delete("/user/v1/{userId}", userId)
-                )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
-
-        Mockito.verify(userCrudInputPort, Mockito.times(1)).deleteUser(userId);
-        Mockito.verifyNoMoreInteractions(userCrudInputPort);
-
-    }
 }

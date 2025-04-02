@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -108,7 +109,11 @@ public class PurchaseImplTest {
 
         UserDomain userDomain = UserDomain.builder().email(userEmail).loyalty_points(10L).build();
         BookDomain bookDomain = BookDomain.builder().id(bookId).base_price(10.0f).type(BookTypeDomain.REGULAR).quantity(5).build();
-        PurchaseDomain purchaseDomain = new PurchaseDomain.Builder().id(1L).transaction_id(UUID.randomUUID()).build();
+        PurchaseDomain purchaseDomain = new PurchaseDomain.Builder()
+                .id(1L)
+                .transaction_id(UUID.randomUUID())
+                .bookEntity(bookDomain)
+                .build();
 
         Mockito.when(userCrudInputPort.getUserByEmail(userEmail)).thenReturn(userDomain);
         Mockito.when(bookCrudInputPort.getBookById(bookId)).thenReturn(bookDomain);
@@ -117,8 +122,10 @@ public class PurchaseImplTest {
         List<PurchaseDomain> response = service.purchaseBooks(bookIds, userEmail);
 
         Assertions.assertNotNull(response);
-        Mockito.verify(userCrudInputPort, Mockito.times(1)).getUserByEmail(userEmail);
+        Mockito.verify(userCrudInputPort, Mockito.times(2)).getUserByEmail(userEmail);
+        Mockito.verify(userCrudInputPort, Mockito.times(1)).updateUserLoyaltyPoints(ArgumentMatchers.any(), ArgumentMatchers.any());
         Mockito.verify(bookCrudInputPort, Mockito.times(1)).getBookById(bookId);
+        Mockito.verify(bookCrudInputPort, Mockito.times(1)).updateBookQuantity(4, bookId);
         Mockito.verify(purchaseOutputPort, Mockito.times(1)).saveListPurchaseDomain(Mockito.anyList());
         Mockito.verifyNoMoreInteractions(userCrudInputPort);
         Mockito.verifyNoMoreInteractions(bookCrudInputPort);

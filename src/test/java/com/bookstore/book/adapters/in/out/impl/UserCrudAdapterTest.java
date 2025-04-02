@@ -98,19 +98,6 @@ public class UserCrudAdapterTest {
         Mockito.verifyNoMoreInteractions(userRepository);
     }
 
-    @DisplayName("Should delete a user")
-    @Test
-    void should_deleteAUser() {
-        Long userId = 1L;
-
-        Mockito.doNothing().when(userRepository).deleteById(userId);
-
-        service.deleteUser(userId);
-
-        Mockito.verify(userRepository, Mockito.times(1)).deleteById(userId);
-        Mockito.verifyNoMoreInteractions(userRepository);
-    }
-
     @DisplayName("Should get a user by email")
     @Test
     void should_getAUserByEmail() {
