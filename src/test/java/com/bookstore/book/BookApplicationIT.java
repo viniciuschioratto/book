@@ -1,8 +1,8 @@
-package com.bookstore.book.adapters.in.api;
+package com.bookstore.book;
 
-import com.bookstore.book.BookApplication;
 import com.bookstore.book.adapters.in.api.request.BookTypeCreateRequest;
 import com.bookstore.book.adapters.in.api.request.CreateBookRequest;
+import com.bookstore.book.adapters.in.api.request.CreateUserRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
@@ -31,7 +31,7 @@ import java.io.File;
 @ActiveProfiles("integration-test")
 @AutoConfigureMockMvc
 @Testcontainers
-public class BookApiIT {
+public class BookApplicationIT {
     @Autowired
     protected MockMvc mockMvc;
 
@@ -77,5 +77,56 @@ public class BookApiIT {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.author", Matchers.is("Vinicius")));
+    }
+
+    @DisplayName("Should Create User - Integration Test")
+    @Test
+    void should_createUser() throws Exception {
+
+        CreateUserRequest createUserRequest = CreateUserRequest.builder()
+                .email("email@email.com")
+                .name("Vinicius")
+                .build();
+
+        this.mockMvc
+                .perform(
+                        MockMvcRequestBuilders.post("/user/v1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(createUserRequest))
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name", Matchers.is("Vinicius")));
+    }
+
+    @DisplayName("Should Calculate purchase price - Integration Test")
+    @Test
+    void should_calculatePurchasePrice() throws Exception {
+
+        CreateUserRequest createUserRequest = CreateUserRequest.builder()
+                .email("email_purchase@email.com")
+                .name("Vinicius")
+                .build();
+
+        this.mockMvc
+                .perform(
+                        MockMvcRequestBuilders.post("/user/v1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(createUserRequest))
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+
+        this.mockMvc
+                .perform(
+                        MockMvcRequestBuilders.get("/purchase/v1/calculate-price")
+                                .param("email", "email_purchase@email.com")
+                                .param("books", "1")
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
 }
