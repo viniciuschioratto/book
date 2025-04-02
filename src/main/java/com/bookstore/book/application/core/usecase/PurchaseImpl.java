@@ -43,48 +43,26 @@ public class PurchaseImpl implements PurchaseInputPort {
 
     @Override
     public CalculatePriceDomain purchaseCalculatePrice(List<Long> bookIds, String userEmail) throws UserNotFoundException {
+        // Get user by email
         UserDomain userDomain = userCrudInputPort.getUserByEmail(userEmail);
-        //List<BookDomain> bookDomains = bookCrudInputPort.getBooksByIds(bookIds);
-        List<BookDomain> bookDomains = new ArrayList<>();
-
-        bookIds.forEach(bookId -> {
-            try {
-                bookDomains.add(bookCrudInputPort.getBookById(bookId));
-            } catch (BookNotFoundException e) {
-                logger.warning("Book not found with id: " + bookId);
-            }
-        });
+        // Get books by ids
+        List<BookDomain> bookDomains = getBooks(bookIds);
 
         List<CalculateBookPriceDomain> calculateBookPriceDomains = new ArrayList<>();
 
-        bookDomains.stream()
-                .filter(bookDomain -> bookDomain.getType().equals(BookTypeDomain.NEW_RELEASE))
-                .forEach(bookDomain -> {
-                    calculateBookPriceDomains.add(
-                            new CalculateBookPriceDomain.DomainBuilder()
-                                    .book(bookDomain)
-                                    .loyalty_points(false)
-                                    .totalPrice(bookDomain.getBase_price())
-                                    .discount(0.0f)
-                                    .build()
-                    );
-                });
+        // Filter books by type - NEW_RELEASE
+        // Add to calculateBookPriceDomains
+        filterNewReleaseTypeAndAddCalculateBookPriceDomains(bookDomains, calculateBookPriceDomains);
 
         // Calculate total price
-        Float totalPriceWithoutDiscount = bookDomains.stream()
-                .reduce(0.0f, (subtotal, element) -> subtotal + element.getBase_price(), Float::sum);
+        Float totalPriceWithoutDiscount = sumBasePrice(bookDomains);
+
 
         // Filter books by type - REGULAR
-        List<BookDomain> regularType = bookDomains
-                .stream()
-                .filter(bookDomain -> bookDomain.getType().equals(BookTypeDomain.REGULAR))
-                .toList();
+        List<BookDomain> regularType = filterByBookTypeDomain(bookDomains, BookTypeDomain.REGULAR);
 
         // Filter books by type - OLD_EDITION
-        List<BookDomain> oldEditionType = bookDomains
-                .stream()
-                .filter(bookDomain -> bookDomain.getType().equals(BookTypeDomain.OLD_EDITION))
-                .toList();
+        List<BookDomain> oldEditionType = filterByBookTypeDomain(bookDomains, BookTypeDomain.OLD_EDITION);
 
         float discount = 0.0f;
 
@@ -109,47 +87,31 @@ public class PurchaseImpl implements PurchaseInputPort {
                 discount = bookDiscountFree.getBase_price();
 
                 calculateBookPriceDomains.add(
-                        new CalculateBookPriceDomain.DomainBuilder()
-                                .book(bookDiscountFree)
-                                .loyalty_points(true)
-                                .totalPrice(bookDiscountFree.getBase_price())
-                                .discount(bookDiscountFree.getBase_price())
-                                .build()
+                        buildCalculateBookPriceDomain(bookDiscountFree, true, bookDiscountFree.getBase_price(), bookDiscountFree.getBase_price())
                 );
             }
         }
 
         // Calculate the total price of the books by type
-        Float regularTypePrice = regularType.stream().reduce(0.0f, (subtotal, element) -> subtotal + element.getBase_price(), Float::sum);
-        Float oldEditionTypePrice = oldEditionType.stream().reduce(0.0f, (subtotal, element) -> subtotal + element.getBase_price(), Float::sum);
+        Float regularTypePrice = sumBasePrice(regularType);
+        Float oldEditionTypePrice = sumBasePrice(oldEditionType);
+
+        boolean hasRegularTypeDiscount = regularType.size() >= 3;
 
         // Apply discount for REGULAR type
-        if (regularType.size() >= 3) {
+        if (hasRegularTypeDiscount) {
             // 10% discount
             discount += regularTypePrice * 0.1f;
-
-            regularType.forEach(bookDomain -> {
-                calculateBookPriceDomains.add(
-                        new CalculateBookPriceDomain.DomainBuilder()
-                                .book(bookDomain)
-                                .loyalty_points(false)
-                                .totalPrice(bookDomain.getBase_price())
-                                .discount(bookDomain.getBase_price() * 0.1f)
-                                .build()
-                );
-            });
-        } else {
-            regularType.forEach(bookDomain -> {
-                calculateBookPriceDomains.add(
-                        new CalculateBookPriceDomain.DomainBuilder()
-                                .book(bookDomain)
-                                .loyalty_points(false)
-                                .totalPrice(bookDomain.getBase_price())
-                                .discount(0.0f)
-                                .build()
-                );
-            });
         }
+
+        regularType.forEach(bookDomain -> calculateBookPriceDomains.add(
+                buildCalculateBookPriceDomain(
+                        bookDomain,
+                        false,
+                        bookDomain.getBase_price(),
+                        hasRegularTypeDiscount ? bookDomain.getBase_price() * 0.1f : 0.0f
+                )
+        ));
 
         // Apply discount for OLD_EDITION type
         if (!oldEditionType.isEmpty()) {
@@ -157,31 +119,17 @@ public class PurchaseImpl implements PurchaseInputPort {
                 // 25% discount
                 discount += oldEditionTypePrice * 0.25f;
 
-                oldEditionType.forEach(bookDomain -> {
-                    calculateBookPriceDomains.add(
-                            new CalculateBookPriceDomain.DomainBuilder()
-                                    .book(bookDomain)
-                                    .loyalty_points(false)
-                                    .totalPrice(bookDomain.getBase_price())
-                                    .discount(bookDomain.getBase_price() * 0.25f)
-                                    .build()
-                    );
-                });
+                oldEditionType.forEach(bookDomain -> calculateBookPriceDomains.add(
+                        buildCalculateBookPriceDomain(bookDomain, false, bookDomain.getBase_price(), bookDomain.getBase_price() * 0.25f)
+                ));
 
             } else {
                 // 20% discount
                 discount += oldEditionTypePrice * 0.2f;
 
-                oldEditionType.forEach(bookDomain -> {
-                    calculateBookPriceDomains.add(
-                            new CalculateBookPriceDomain.DomainBuilder()
-                                    .book(bookDomain)
-                                    .loyalty_points(false)
-                                    .totalPrice(bookDomain.getBase_price())
-                                    .discount(bookDomain.getBase_price() * 0.2f)
-                                    .build()
-                    );
-                });
+                oldEditionType.forEach(bookDomain -> calculateBookPriceDomains.add(
+                        buildCalculateBookPriceDomain(bookDomain, false, bookDomain.getBase_price(), bookDomain.getBase_price() * 0.2f)
+                ));
 
             }
         }
@@ -194,6 +142,50 @@ public class PurchaseImpl implements PurchaseInputPort {
                 .totalPriceWithDiscount(
                         totalPriceWithoutDiscount - discount
                 )
+                .build();
+    }
+
+    private Float sumBasePrice(List<BookDomain> bookDomains) {
+        return bookDomains.stream().reduce(0.0f, (subtotal, element) -> subtotal + element.getBase_price(), Float::sum);
+    }
+
+    private List<BookDomain> filterByBookTypeDomain(List<BookDomain> bookDomains, BookTypeDomain bookTypeDomain) {
+        return bookDomains
+                .stream()
+                .filter(bookDomain -> bookDomain.getType().equals(bookTypeDomain))
+                .toList();
+    }
+
+    private void filterNewReleaseTypeAndAddCalculateBookPriceDomains(List<BookDomain> bookDomains, List<CalculateBookPriceDomain> calculateBookPriceDomains) {
+        bookDomains.stream()
+                .filter(bookDomain -> bookDomain.getType().equals(BookTypeDomain.NEW_RELEASE))
+                .forEach(bookDomain -> {
+                    calculateBookPriceDomains.add(
+                            buildCalculateBookPriceDomain(bookDomain, false, bookDomain.getBase_price(), 0.0f)
+                    );
+                });
+    }
+
+    private List<BookDomain> getBooks(List<Long> bookIds) {
+        List<BookDomain> bookDomains = new ArrayList<>();
+
+        bookIds.forEach(bookId -> {
+            try {
+                bookDomains.add(bookCrudInputPort.getBookById(bookId));
+            } catch (BookNotFoundException e) {
+                logger.warning("Book not found with id: " + bookId);
+            }
+        });
+
+        return bookDomains;
+    }
+
+    private CalculateBookPriceDomain buildCalculateBookPriceDomain(BookDomain bookDomain, boolean loyaltyPoints, float totalPrice, float discount) {
+        return new CalculateBookPriceDomain.DomainBuilder()
+                .book(bookDomain)
+                .loyalty_points(loyaltyPoints)
+                .totalPrice(totalPrice)
+                .discount(discount)
                 .build();
     }
 
