@@ -196,6 +196,7 @@ public class PurchaseImpl implements PurchaseInputPort {
 
         UUID transactionId = UUID.randomUUID();
 
+        // Create purchase
         List<PurchaseDomain> purchaseDomains = calculatePriceDomain.getBookPriceDomains()
                 .stream()
                 .map(value -> new PurchaseDomain.Builder()
@@ -209,12 +210,22 @@ public class PurchaseImpl implements PurchaseInputPort {
                         .build())
                 .toList();
 
+        // Save purchase
         List<PurchaseDomain> purchaseDomainSaved = purchaseOutputPort.saveListPurchaseDomain(purchaseDomains);
 
-        //Long currentLoyaltyPoints = userDomain.getLoyalty_points();
+        // Get current loyalty points
         AtomicLong currentLoyaltyPoints = new AtomicLong(userDomain.getLoyalty_points());
 
         // Update book quantity
+        updateBookQuantity(purchaseDomainSaved, currentLoyaltyPoints);
+
+        // Update user loyalty points
+        userCrudInputPort.updateUserLoyaltyPoints(currentLoyaltyPoints.get(), userDomain.getId());
+
+        return purchaseDomainSaved;
+    }
+
+    private void updateBookQuantity(List<PurchaseDomain> purchaseDomainSaved, AtomicLong currentLoyaltyPoints) {
         purchaseDomainSaved.forEach(purchaseDomain -> {
             bookCrudInputPort.updateBookQuantity(
                     purchaseDomain.getBookEntity().getQuantity() - 1,
@@ -229,10 +240,5 @@ public class PurchaseImpl implements PurchaseInputPort {
                 currentLoyaltyPoints.incrementAndGet();
             }
         });
-
-        // Update user loyalty points
-        userCrudInputPort.updateUserLoyaltyPoints(currentLoyaltyPoints.get(), userDomain.getId());
-
-        return purchaseDomainSaved;
     }
 }
