@@ -139,7 +139,7 @@ public class BookApi {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Get all Book")
+    @Operation(summary = "Get all Book", description = "Return all active books")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Book list returned successfully", content = {
                     @Content(

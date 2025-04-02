@@ -22,7 +22,7 @@ To run the application we can use the docker compose file provided in the root o
 We can use the following command in the root of the project to start the application.
 
 ```sh
-docker compose -f docker-compose.yml up  
+docker compose -f docker-compose.yml up --build 
 ```
 
 After start the application we can access the following url:
@@ -44,7 +44,7 @@ To run the tests we can use the following command.
 ./gradlew test
 ```
 
-After finish the build process we can check the code coverage report in the link from Jacoco in the terminal. Or we can find it inside the `build` folder in the project.
+After finish the test process we can check the code coverage report in the link from Jacoco in the terminal. Or we can find it inside the `build` folder in the project.
 
 ## Flows
 ### Book
