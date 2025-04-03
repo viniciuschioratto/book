@@ -50,12 +50,17 @@ After finish the test process we can check the code coverage report in the link 
 ### Book
 The book API provide the following options:
 - Create a new book
+  - When we are creating a new book we need to provide the type and we have the following options:
+    - NEW_RELEASE
+    - REGULAR
+    - OLD_EDITION
 - Update a book
 - Delete a book
   - It is a logical delete
   - As the purchase will be associated with a book, we can't delete a book that has a purchase associated
 - Get a book by Id
 - Get all books active
+  - List all books that are active in the database
 
 ### User
 The user API provide the following options:
@@ -68,7 +73,15 @@ The user API provide the following options:
 The purchase API provide the following options:
 - Calculate the Price
   - This API is responsible to calculate the price of a purchase based on the book and the user.
+  - We need to provide a List of books and the user email.
+  - The user email is necessary to calculate the loyalty points and apply discounts.
 - Create a new purchase
+  - We need to provide the user email and a list of books ids.
   - This API will create a new purchase and update the loyalty points from the user.
   - It will create the record about a purchase associated with a book and user.
 - Get a purchase by Id
+
+To use the Bookstore API we can list all the books and select the books we want to buy.
+Before we calculate the price and purchase a book we need to create a user, so we can use the user API.
+
+Once, we have a user and books we can calculate the price and purchase the books through the purchase API.

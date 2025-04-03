@@ -14,6 +14,7 @@ public class UpdateBookRequest {
     private String title;
     private Float base_price;
     private int quantity;
+    private boolean active;
     private BookTypeCreateRequest type;
     private String author;
     private String description;
