@@ -16,6 +16,8 @@ After start the application we can access the database in the PgAdmin interface.
 
 Also, this application is using the Swagger to expose all the endpoints in the API.
 
+The application is running wth Docker, where we can use just a command and the application will be up and running with all the necessary resources.
+
 ## Setup
 
 To run the application we can use the docker compose file provided in the root of the project. The docker compose file will create the container about our application and the necessary resources.
@@ -85,3 +87,16 @@ To use the Bookstore API we can list all the books and select the books we want 
 Before we calculate the price and purchase a book we need to create a user, so we can use the user API.
 
 Once, we have a user and books we can calculate the price and purchase the books through the purchase API.
+
+## Decisions
+I took some decisions to implement the application, some of them are:
+1. Create a user flow
+   1. As we have the loyalty points I decided to create a user flow where we can have more than one user in the application and control de loyalty points.
+2. Use the Hexagonal architecture
+   1. I decided to use the hexagonal architecture to separate the application and adapters layers. This way we can have a better separation of concerns and make the application more flexible.
+3. Docker compose
+   1. I decided to use the docker compose to run the application, because it is easy to include new resources and run locally. Also, with this strategy we need only Docker to start the application.
+4. Strategy Pattern
+   1. I decide to use the Strategy Pattern to calculate the book price, because later if we need to add new types of books we can do it easily.
+5. Integration tests
+   1. I decided to use the integration tests to test the application as a whole, this way we can validate the interaction between all the layers in the application.
